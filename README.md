@@ -30,7 +30,7 @@ KoQuality 데이터셋으로 학습된 [DILAB-HYU/KoQuality-Polyglot-5.8b](https
 
 
 ## Generate curation dataset (KoQuality)
-고품질 명령어 데이터셋 KoQuality를 생성하는 방법은 다음과 같다. 
+고품질 명령어 데이터셋 KoQuality를 생성하는 방법은 아래와 같습니다.
 #### 0. 파이썬 환경 구축
 ```
 python3.10 -m venv ko_venv
@@ -40,14 +40,13 @@ pip install -r requirements.txt
 
 
 #### 1. Prepare raw corpus 
-먼저 Curation할 Dataset을 하나의 Raw corpus 데이터셋으로 만들어준다. 각각의 데이터셋마다 다른 Column_name을 Instruction, Output으로 병합하였다.
 ```
 cd gen_dataset_curation
 python prepare_raw_corpus.py --save_hf_path <username>/koquality_raw
 ```
 
 #### 2. Calculate perplexity
-Curation의 지표 중 하나인 Perplexity(PPL)계산을 위해 한국어 언어모델 [EleutherAI/polyglot-ko-1.3b](https://huggingface.co/EleutherAI/polyglot-ko-1.3b)모델을 활용하였다. 아래 코드는 PPL을 계산하고, 하나의 Column을 추가하여 데이터셋에 저장한다.
+Curation의 지표 중 하나인 Perplexity(PPL)계산을 위해 한국어 언어모델 [EleutherAI/polyglot-ko-1.3b](https://huggingface.co/EleutherAI/polyglot-ko-1.3b)모델을 활용하였습니다. 아래 코드는 PPL을 계산하고, 하나의 Column을 추가하여 데이터셋에 저장합니다.
 
 ```
 python generate_perplexity.py --device 3 -d <username>/koquality_raw -m EleutherAI/polyglot-ko-1.3b --save_hf True --save_hf_user_name <username>
@@ -55,7 +54,7 @@ python generate_perplexity.py --device 3 -d <username>/koquality_raw -m Eleuther
 
 
 #### 3. Generate sentence embeddings and proceed with clustering
-Contrastive Learning으로 학습된 [BM-K/KoSimCSE-roberta](https://huggingface.co/BM-K/KoSimCSE-roberta-multitask)를 활용하여 명령어 문장을 Sentence Embedding하고, 이를 K-means Clustering으로 그룹화 하였다. 길이 그룹별 클러스터링을 진행하기 위해, 길이 그룹의 개수를 L : {1, 5, 10, 20}로, 클러스터링 개수를 K : {10, 20, 50, 100}으로 실험을 진행하였으며, 최종적으로 L=5, K=100을 활용한다.
+Contrastive Learning으로 학습된 [BM-K/KoSimCSE-roberta](https://huggingface.co/BM-K/KoSimCSE-roberta-multitask)를 활용하여 명령어 문장을 Sentence Embedding하고, 이를 K-means Clustering으로 그룹화 합니다. 길이 그룹별 클러스터링을 진행하기 위해, 길이 그룹의 개수를 L : {1, 5, 10, 20}로, 클러스터링 개수를 K : {10, 20, 50, 100}으로 실험을 진행하였으며, 최종적으로 L=5, K=100을 활용하였습니다.
 ```
 python generate_sentence_embedding_clustering.py --len 1 --device 0 -d <username>/koquality_raw -m EleutherAI/polyglot-ko-1.3b -e BM-K/KoSimCSE-roberta-multitask &
 python generate_sentence_embedding_clustering.py --len 5 --device 1 -d <username>/koquality_raw -m EleutherAI/polyglot-ko-1.3b -e BM-K/KoSimCSE-roberta-multitask & 
@@ -64,7 +63,7 @@ python generate_sentence_embedding_clustering.py --len 20 --device 3 -d <usernam
 ```
 
 #### 4. Sampling dataset 
-데이터셋을 Sampling하기 위해 샘플링 비율은 N : {0.1, 0.05, 0.01} 중 하나로 설정하여 데이터셋을 생성하였다. 생성된 데이터셋은 코드에 지정된 Folder에 저장된다.
+데이터셋을 Sampling하기 위해 샘플링 비율은 N : {0.1, 0.05, 0.01} 중 하나로 설정하여 데이터셋을 생성하였으며, 생성된 데이터셋은 코드에 지정된 Folder에 저장됩니다.
 ```
 python proceed_sampling_dataset.py --len 1
 python proceed_sampling_dataset.py --len 5
@@ -76,7 +75,7 @@ python proceed_sampling_dataset.py --len 20
 
 
 ## Train LLMs
-생성한 데이터셋 KoQuality를 실험하기 위해 [Beomi/KoAlpaca](https://github.com/Beomi/KoAlpaca)에 작성된 코드를 활용하여 모델을 학습하였다. 학습에 활용한 모델은 [EleutherAI/polyglot-ko-5.8b](https://huggingface.co/EleutherAI/polyglot-ko-5.8b)를  A100 80GB 4장을 활용하여 학습하였으며, 실험 셋팅은 하단에 적어두었다.
+생성한 데이터셋 KoQuality를 실험하기 위해 [Beomi/KoAlpaca](https://github.com/Beomi/KoAlpaca)에 작성된 코드를 활용하여 모델을 학습하였으며, 학습에 활용한 모델은 [EleutherAI/polyglot-ko-5.8b](https://huggingface.co/EleutherAI/polyglot-ko-5.8b)이고 실험 세팅은 아래와 같습니다.
 
 ```
 cd train_llm
@@ -97,7 +96,7 @@ num_epochs: 2.0
 
 
 ## NLU Evaluation 
-[EleutherAI/lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness)의 polyglot branch를 활용하여 KoBEST 벤치마크 데이텃세에 대해 평가를 진행하였다.
+[EleutherAI/lm-evaluation-harness](https://github.com/EleutherAI/lm-evaluation-harness)의 polyglot branch를 활용하여 KoBEST 벤치마크 데이터셋에 대해 평가를 진행하였습니다.
 ```
 
 git clone https://github.com/EleutherAI/lm-evaluation-harness
